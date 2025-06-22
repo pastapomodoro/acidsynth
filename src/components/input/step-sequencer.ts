@@ -102,6 +102,11 @@ export class ToneStepSequencer extends LitElement {
 		}
 	}
 
+	set(col: number, row: number, value: boolean) {
+		this._matrix[col][row] = value;
+		this.requestUpdate();
+	}
+
 	render() {
 		return html`
 			<div id="container">${this._matrix.map((column, x) => html`

@@ -31,6 +31,6 @@ $lightPurple: #ecfbff;
 	}
 }
 
-@function clamp($number, $min, $max) {
+@function clamp2($number, $min, $max) {
 	@return min(max($number, $min), $max);
 }

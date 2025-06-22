@@ -3,28 +3,401 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
+		<title>Acid Synth</title>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.28/Tone.js"></script>
 		<link
 			href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
 			rel="stylesheet"
 		/>
+		<script src="../build/components.js"></script>
+		<script src="../build/tone-ui.js"></script>
+		<style>
+			body {
+				font-family: sans-serif;
+				padding: 20px;
+				background-color: #f5f5f5;
+				color: #333;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+			#main-panel {
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+				background-color: #ffffff;
+				padding: 20px;
+				border-radius: 10px;
+				margin-bottom: 20px;
+				width: 80%;
+				max-width: 900px;
+				box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+			}
+			#controls-panel {
+				display: grid;
+				grid-template-columns: 1fr 1fr 1fr 1fr;
+				gap: 20px;
+				border: 2px solid #e0e0e0;
+				padding: 15px;
+				border-radius: 5px;
+				background-color: #fafafa;
+			}
+			.control-group {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+			.control-group h3 {
+				margin-top: 0;
+				text-align: center;
+				color: #555;
+			}
+			tone-step-sequencer {
+				height: 300px;
+				width: 100%;
+			}
+			/* Vertical Slider Style */
+			tone-slider {
+				writing-mode: vertical-lr;
+				direction: rtl;
+				width: 40px;
+				height: 150px;
+				padding: 0 5px;
+			}
+			tone-number {
+				width: 100px;
+			}
+			#start-button {
+				background-color: #4CAF50;
+				color: white;
+				padding: 10px 20px;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				font-size: 16px;
+			}
+			#start-button:hover {
+				background-color: #45a049;
+			}
+		</style>
 	</head>
 	<body>
-		<tone-code>
-			<pre>
-				const player = new Tone.Player({
-					url: "https://tonejs.github.io/audio/berklee/gurgling_theremin_1.mp3",
-					loop: true,
-					autostart: true,
-				})
-				//create a distortion effect
-				const distortion = new Tone.Distortion(0.4).toDestination();
-				//connect a player to the distortion
-				player.connect(distortion);
-			</pre
-			>
-		</tone-code>
-		<script src="../build/code.js"></script>
+		<h1>Acid Synth</h1>
+		<button id="start-button">Start Audio</button>
+		<button id="tb303-pattern-btn" style="margin-bottom:10px;">Pattern TB-303 Famoso</button>
+		<button id="tb303-melody-btn" style="margin-bottom:10px; margin-left:10px;">Pattern TB-303 Melodico</button>
+		<hr style="width:100%; margin: 20px 0;">
+
+		<div id="main-panel">
+			<div id="controls-panel">
+				<div class="control-group">
+					<h3>Transport</h3>
+					<tone-play-toggle id="play-button"></tone-play-toggle>
+					<tone-number id="bpm-input" label="BPM" min="60" max="240" value="130"></tone-number>
+				</div>
+				<div class="control-group">
+					<h3>Filter</h3>
+					<tone-slider id="cutoff-slider" label="Cutoff" min="200" max="8000" value="500" step="10"></tone-slider>
+					<tone-slider id="resonance-slider" label="Resonance" min="0" max="18" value="8" step="0.1"></tone-slider>
+				</div>
+				<div class="control-group">
+					<h3>Envelope</h3>
+					<tone-slider id="decay-slider" label="Decay" min="0.1" max="2" value="0.8" step="0.01"></tone-slider>
+					<tone-slider id="accent-slider" label="Accent" min="0" max="1" value="0.3" step="0.01"></tone-slider>
+				</div>
+				<div class="control-group">
+					<h3>Drive</h3>
+					<tone-slider id="distortion-slider" label="Distortion" min="0" max="1" value="0.2" step="0.01"></tone-slider>
+					<tone-slider id="slide-slider" label="Slide" min="0" max="0.5" value="0.1" step="0.01"></tone-slider>
+				</div>
+			</div>
+			<tone-step-sequencer id="sequencer" rows="8" columns="16"></tone-step-sequencer>
+			<!-- Slider volume generale -->
+			<div style="margin-bottom:10px; display:flex; align-items:center; gap:10px;">
+				<label for="master-volume">Volume</label>
+				<input type="range" id="master-volume" min="-60" max="0" value="-6" step="1" style="width:150px;">
+			</div>
+		</div>
+
+		<script>
+			// --- UTILS ---
+			customElements.whenDefined('tone-step-sequencer').then(() => {
+				const sequencer = document.querySelector("#sequencer");
+				// Pattern di default ispirato a js303
+				const initialPattern = [
+					[0,1,false,true,false,false], // accent
+					[0,0,true,true,false,false], // slide
+					[0,0,true,true,false,false],
+					[0,0,true,true,false,false],
+					[0,0,false,true,false,false],
+					[0,0,true,true,false,false],
+					[0,1,true,true,false,false], // accent+slide
+					[0,0,true,true,false,false],
+					[0,0,false,true,false,false],
+					[4,1,false,true,false,false], // accent
+					[1,0,false,true,false,false],
+					[5,1,false,true,false,false], // accent
+					[2,0,false,true,false,false],
+					[6,0,false,true,false,false],
+					[6,1,true,true,true,false], // accent+slide+down
+					[6,0,true,true,true,false], // slide+down
+				];
+				// Applica pattern
+				for (let col = 0; col < 16; col++) {
+					const [row, accent, slide, gate] = [initialPattern[col][0], initialPattern[col][1], initialPattern[col][2], initialPattern[col][3]];
+					sequencer.set(col, row, gate);
+				}
+			});
+
+			// --- TB-303 STYLE SYNTH CLONE ---
+			const params = {
+				waveform: "sawtooth", // js303: 0=saw, 1=square
+				tuning: 0, // semitoni
+				cutoff: 240, // Hz
+				resonance: 1.0, // 0..1
+				envmod: 0.0, // 0..1
+				decay: 0.1, // secondi (100ms)
+				accent: 0.0, // 0..1
+				dist_shape: 0.0, // foldback
+				dist_threshold: 1.0, // foldback
+			};
+
+			const oscillator = new Tone.Oscillator({
+				type: params.waveform,
+				frequency: "C3"
+			});
+
+			const filter = new Tone.Filter({
+				type: "lowpass",
+				frequency: params.cutoff,
+				Q: 18 * params.resonance + 1
+			});
+
+			const envelope = new Tone.Envelope({
+				attack: 0.001,
+				decay: params.decay,
+				sustain: 0,
+				release: 0.1
+			});
+
+			const filterEnvelope = new Tone.FrequencyEnvelope({
+				attack: 0.001,
+				decay: params.decay,
+				sustain: 0,
+				release: 0.1,
+				baseFrequency: params.cutoff,
+				octaves: 3.5 * (params.envmod + 0.2)
+			});
+
+			const compressor = new Tone.Compressor({
+				threshold: -20,
+				ratio: 4,
+				attack: 0.003,
+				release: 0.1
+			});
+
+			// DEBUG: Catena audio semplificata
+			oscillator.connect(filter);
+			filter.connect(Tone.Destination);
+			envelope.connect(filter.frequency);
+			filterEnvelope.connect(filter.frequency);
+
+			const scale = ["C3", "Eb3", "F3", "G3", "Bb3", "C4", "Eb4", "F4"];
+			let currentNote = null;
+			let slideTime = 0.1;
+			let oscillatorStarted = false;
+
+			// --- UI BINDING ---
+			document.querySelector("#start-button").addEventListener("click", async () => {
+				await Tone.start();
+				document.querySelector("#start-button").textContent = "Audio Ready!";
+				// DEBUG: Avvia subito l'oscillatore per sentire se suona
+				if (!oscillatorStarted) {
+					oscillator.start();
+					oscillatorStarted = true;
+				}
+			});
+			
+			// Volume master
+			const masterVolume = new Tone.Volume(-6).toDestination();
+			// Catena audio aggiornata: oscillator -> filter -> masterVolume -> Destination
+			oscillator.disconnect();
+			filter.disconnect();
+			oscillator.connect(filter);
+			filter.connect(masterVolume);
+			envelope.connect(filter.frequency);
+			filterEnvelope.connect(filter.frequency);
+
+			document.querySelector("#sequencer").addEventListener("trigger", ({ detail }) => {
+				console.log("TRIGGER", detail);
+				const { row, time, column } = detail;
+				const note = scale[scale.length - 1 - row];
+				const freq = Tone.Frequency(note).toFrequency();
+				// Pattern di default allineato a 16 colonne
+				const pattern = [
+					[0,1,false,true,false,false],
+					[0,0,true,true,false,false],
+					[0,0,true,true,false,false],
+					[0,0,true,true,false,false],
+					[0,0,false,true,false,false],
+					[0,0,true,true,false,false],
+					[0,1,true,true,false,false],
+					[0,0,true,true,false,false],
+					[0,0,false,true,false,false],
+					[4,1,false,true,false,false],
+					[1,0,false,true,false,false],
+					[5,1,false,true,false,false],
+					[2,0,false,true,false,false],
+					[6,0,false,true,false,false],
+					[6,1,true,true,true,false],
+					[6,0,true,true,true,false],
+				];
+				const step = pattern[column % pattern.length] || [0,0,false,true,false,false];
+				const accent = step[1];
+				const slide = step[2];
+
+				// Accent: modula envelope/filterEnvelope e volume solo sugli step accentati
+				const envmod = accent ? 0.8 : params.envmod;
+				const decay = accent ? params.decay * 1.3 : params.decay;
+				const cutoff = accent ? params.cutoff + 200 : params.cutoff;
+				const accentGain = accent ? 1.2 : 1.0;
+
+				envelope.decay = decay;
+				filterEnvelope.decay = decay;
+				filterEnvelope.baseFrequency = cutoff;
+				filterEnvelope.octaves = 3.5 * (envmod + 0.2);
+				masterVolume.volume.value = parseInt(masterVolumeSlider.value, 10) + (accent ? 2 : 0); // leggero boost sugli accent
+
+				// Cambia la frequenza dell'oscillatore (slide solo se step slide)
+				if (currentNote !== null && slide) {
+					oscillator.frequency.linearRampToValueAtTime(freq, "+" + slideTime);
+				} else {
+					oscillator.frequency.setValueAtTime(freq, Tone.now());
+				}
+				currentNote = freq;
+
+				envelope.triggerAttackRelease("16n", Tone.now());
+				filterEnvelope.triggerAttackRelease("16n", Tone.now());
+			});
+			
+			document.querySelector("#play-button").addEventListener("start", () => {
+				if (!oscillatorStarted) {
+					oscillator.start();
+					oscillatorStarted = true;
+				}
+				Tone.Transport.start();
+			});
+			document.querySelector("#play-button").addEventListener("stop", () => {
+				Tone.Transport.stop();
+				if (oscillatorStarted) {
+					oscillator.stop();
+					oscillatorStarted = false;
+					currentNote = null;
+				}
+			});
+			
+			const bpmInput = document.querySelector("#bpm-input");
+			Tone.Transport.bpm.value = 100;
+			bpmInput.addEventListener("value", (e) => {
+				Tone.Transport.bpm.value = e.detail.value;
+			});
+
+			// Filter controls
+			const cutoffSlider = document.querySelector("#cutoff-slider");
+			cutoffSlider.value = params.cutoff;
+			cutoffSlider.addEventListener("input", (e) => {
+				params.cutoff = e.detail.value;
+				filterEnvelope.baseFrequency = params.cutoff;
+				filter.frequency.value = params.cutoff;
+			});
+
+			const resonanceSlider = document.querySelector("#resonance-slider");
+			resonanceSlider.value = params.resonance * 18 + 1;
+			resonanceSlider.addEventListener("input", (e) => {
+				params.resonance = (e.detail.value - 1) / 18;
+				filter.Q.value = e.detail.value;
+			});
+
+			// Envelope controls
+			const decaySlider = document.querySelector("#decay-slider");
+			decaySlider.value = params.decay;
+			decaySlider.addEventListener("input", (e) => {
+				params.decay = e.detail.value;
+				envelope.decay = params.decay;
+				filterEnvelope.decay = params.decay;
+			});
+
+			const accentSlider = document.querySelector("#accent-slider");
+			accentSlider.value = params.accent;
+			accentSlider.addEventListener("input", (e) => {
+				params.accent = e.detail.value;
+			});
+
+			// Drive controls
+			const distortionSlider = document.querySelector("#distortion-slider");
+			distortionSlider.value = params.dist_shape;
+			distortionSlider.addEventListener("input", (e) => {
+				params.dist_shape = e.detail.value;
+				// foldback.curve = foldbackCurve(params.dist_threshold, params.dist_shape);
+			});
+
+			const slideSlider = document.querySelector("#slide-slider");
+			slideSlider.value = slideTime;
+			slideSlider.addEventListener("input", (e) => {
+				slideTime = e.detail.value;
+			});
+
+			// Volume slider binding
+			const masterVolumeSlider = document.getElementById("master-volume");
+			masterVolumeSlider.addEventListener("input", (e) => {
+				masterVolume.volume.value = parseInt(e.target.value, 10);
+			});
+
+			// Bottone per pattern TB-303 famoso
+			document.getElementById("tb303-pattern-btn").addEventListener("click", () => {
+				const sequencer = document.querySelector("#sequencer");
+				// Esempio: pattern ispirato a 'Acid Tracks' (Phuture)
+				// (Nota: la mappatura delle righe dipende dalla tua scala, qui uso una sequenza tipica)
+				const acidPattern = [
+					[0,1], [1,0], [2,0], [3,1],
+					[4,0], [5,1], [6,0], [7,1],
+					[6,0], [5,1], [4,0], [3,1],
+					[2,0], [1,1], [0,0], [1,1],
+				];
+				// Reset sequencer
+				for (let col = 0; col < 16; col++) {
+					for (let row = 0; row < 8; row++) {
+						sequencer.set(col, row, false);
+					}
+				}
+				// Applica nuovo pattern
+				acidPattern.forEach(([row, accent], col) => {
+					sequencer.set(col, row, true);
+					// Accent: opzionale, puoi aggiungere logica per accent se il sequencer lo supporta
+				});
+			});
+
+			document.getElementById("tb303-melody-btn").addEventListener("click", () => {
+				const sequencer = document.querySelector("#sequencer");
+				// Pattern melodico, più ascoltabile (esempio in scala maggiore)
+				const melodyPattern = [
+					[0,1], [2,0], [4,0], [5,1],
+					[4,0], [2,1], [0,0], [2,1],
+					[4,0], [5,1], [7,0], [5,1],
+					[4,0], [2,1], [0,0], [2,1],
+				];
+				// Reset sequencer
+				for (let col = 0; col < 16; col++) {
+					for (let row = 0; row < 8; row++) {
+						sequencer.set(col, row, false);
+					}
+				}
+				// Applica nuovo pattern
+				melodyPattern.forEach(([row, accent], col) => {
+					sequencer.set(col, row, true);
+					// Accent: opzionale, puoi aggiungere logica per accent se il sequencer lo supporta
+				});
+			});
+		</script>
 	</body>
 </html>
