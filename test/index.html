@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Acid Synth</title>
+		<title>BenzodiazeSynth</title>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.28/Tone.js"></script>
 		<link
 			href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
@@ -11,78 +11,164 @@
 		/>
 		<script src="../build/components.js"></script>
 		<script src="../build/tone-ui.js"></script>
+		<link rel="stylesheet" href="../node_modules/@fontsource/inter/index.css">
+		<link rel="stylesheet" href="../node_modules/@fontsource/space-grotesk/index.css">
 		<style>
 			body {
-				font-family: sans-serif;
-				padding: 20px;
-				background-color: #f5f5f5;
-				color: #333;
+				font-family: 'Inter', 'Space Grotesk', Arial, sans-serif;
+				background: #f6f6f6;
+				color: #181818;
+				margin: 0;
+				padding: 0;
 				display: flex;
 				flex-direction: column;
 				align-items: center;
+				min-height: 100vh;
 			}
 			#main-panel {
+				background: #fff;
+				border-radius: 18px;
+				box-shadow: 0 4px 32px 0 #0001;
+				margin-top: 32px;
+				padding: 32px 32px 24px 32px;
+				width: 90vw;
+				max-width: 900px;
 				display: flex;
 				flex-direction: column;
-				gap: 20px;
-				background-color: #ffffff;
-				padding: 20px;
-				border-radius: 10px;
-				margin-bottom: 20px;
-				width: 80%;
-				max-width: 900px;
-				box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+				gap: 32px;
 			}
 			#controls-panel {
-				display: grid;
-				grid-template-columns: 1fr 1fr 1fr 1fr;
-				gap: 20px;
-				border: 2px solid #e0e0e0;
-				padding: 15px;
-				border-radius: 5px;
-				background-color: #fafafa;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				gap: 32px;
+				background: #f2f2f2;
+				border-radius: 12px;
+				padding: 24px 16px 16px 16px;
+				box-shadow: 0 2px 8px 0 #0000;
 			}
 			.control-group {
 				display: flex;
 				flex-direction: column;
 				align-items: center;
+				gap: 18px;
+				min-width: 160px;
 			}
 			.control-group h3 {
-				margin-top: 0;
+				margin: 0 0 8px 0;
+				font-size: 1.05em;
+				font-family: 'Space Grotesk', 'Inter', Arial, sans-serif;
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				color: #181818;
+				text-transform: uppercase;
+			}
+			.slider-row {
+				display: flex;
+				flex-direction: row;
+				align-items: flex-end;
+				gap: 32px;
+				flex-wrap: wrap;
+				justify-content: flex-start;
+			}
+			.slider-col {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 8px;
+				min-width: 120px;
+				max-width: 180px;
+				flex: 1 1 140px;
+				background: #fff;
+				border: 1px solid #ececec;
+				border-radius: 14px;
+				box-shadow: 0 2px 12px 0 #0001;
+				padding: 18px 14px 14px 14px;
+				margin: 0 0 0 0;
+			}
+			.slider-label {
+				font-size: 0.97em;
+				color: #888;
+				font-family: 'Inter', Arial, sans-serif;
+				font-weight: 500;
 				text-align: center;
-				color: #555;
+				margin-bottom: 2px;
 			}
-			tone-step-sequencer {
-				height: 300px;
-				width: 100%;
+			.slider-value {
+				font-size: 1em;
+				color: #222;
+				font-family: 'Space Grotesk', 'Inter', Arial, sans-serif;
+				font-weight: 600;
+				margin-top: 2px;
+				letter-spacing: 0.01em;
 			}
-			/* Vertical Slider Style */
-			tone-slider {
-				writing-mode: vertical-lr;
-				direction: rtl;
-				width: 40px;
-				height: 150px;
-				padding: 0 5px;
+			tone-slider, input[type="range"]#master-volume {
+				appearance: none;
+				background: #eaeaea;
+				height: 4px;
+				border-radius: 2px;
+				margin: 0;
+				width: 120px;
+				box-shadow: 0 1px 2px #0001;
 			}
-			tone-number {
-				width: 100px;
-			}
-			#start-button {
-				background-color: #4CAF50;
-				color: white;
-				padding: 10px 20px;
+			tone-slider::-webkit-slider-thumb, input[type="range"]#master-volume::-webkit-slider-thumb {
+				appearance: none;
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				background: linear-gradient(135deg, #ffb300 60%, #00cfff 100%);
+				box-shadow: 0 2px 8px #0002;
 				border: none;
-				border-radius: 5px;
-				cursor: pointer;
-				font-size: 16px;
+				transition: background 0.2s;
 			}
-			#start-button:hover {
-				background-color: #45a049;
+			tone-slider:focus, input[type="range"]#master-volume:focus {
+				outline: 2px solid #00cfff;
+			}
+			input[type="range"]#master-volume {
+				accent-color: #ffb300;
+				background: #eaeaea;
+				border-radius: 2px;
+				width: 120px;
+				margin: 0;
+			}
+			#start-button, #tb303-pattern-btn, #tb303-melody-btn {
+				background: #181818;
+				color: #fff;
+				border: none;
+				border-radius: 8px;
+				padding: 12px 28px;
+				font-size: 1em;
+				font-family: 'Space Grotesk', 'Inter', Arial, sans-serif;
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				margin: 0 8px 0 0;
+				box-shadow: 0 2px 8px 0 #0001;
+				transition: background 0.2s, color 0.2s;
+				cursor: pointer;
+			}
+			#start-button:hover, #tb303-pattern-btn:hover, #tb303-melody-btn:hover {
+				background: #ffb300;
+				color: #181818;
+			}
+			hr {
+				border: none;
+				height: 2px;
+				background: linear-gradient(90deg, #ffb300 0%, #00cfff 100%);
+				margin: 24px 0;
+				border-radius: 2px;
+			}
+			@media (max-width: 1100px) {
+				.slider-row { gap: 18px; }
+				.slider-col { min-width: 100px; max-width: 100%; flex: 1 1 100px; }
+			}
+			@media (max-width: 700px) {
+				.slider-row { flex-direction: column; gap: 12px; }
+				.slider-col { width: 100%; min-width: 0; max-width: 100%; }
 			}
 		</style>
 	</head>
 	<body>
-		<h1>Acid Synth</h1>
+		<h1>BenzodiazeSynth <span style="font-size:0.6em; color:#bfa800; text-shadow:0 0 8px #fff700; vertical-align:middle;">⚡</span></h1>
 		<button id="start-button">Start Audio</button>
 		<button id="tb303-pattern-btn" style="margin-bottom:10px;">Pattern TB-303 Famoso</button>
 		<button id="tb303-melody-btn" style="margin-bottom:10px; margin-left:10px;">Pattern TB-303 Melodico</button>
@@ -92,31 +178,74 @@
 			<div id="controls-panel">
 				<div class="control-group">
 					<h3>Transport</h3>
-					<tone-play-toggle id="play-button"></tone-play-toggle>
-					<tone-number id="bpm-input" label="BPM" min="60" max="240" value="130"></tone-number>
+					<div class="slider-row">
+						<div class="slider-col">
+							<div class="slider-label">Play</div>
+							<tone-play-toggle id="play-button"></tone-play-toggle>
+						</div>
+						<div class="slider-col">
+							<div class="slider-label">BPM</div>
+							<tone-number id="bpm-input" min="60" max="240" value="130"></tone-number>
+						</div>
+					</div>
 				</div>
 				<div class="control-group">
 					<h3>Filter</h3>
-					<tone-slider id="cutoff-slider" label="Cutoff" min="200" max="8000" value="500" step="10"></tone-slider>
-					<tone-slider id="resonance-slider" label="Resonance" min="0" max="18" value="8" step="0.1"></tone-slider>
+					<div class="slider-row">
+						<div class="slider-col">
+							<div class="slider-label">Cutoff</div>
+							<tone-slider id="cutoff-slider" min="200" max="8000" value="500" step="10"></tone-slider>
+							<div class="slider-value" id="cutoff-value"></div>
+						</div>
+						<div class="slider-col">
+							<div class="slider-label">Resonance</div>
+							<tone-slider id="resonance-slider" min="0" max="18" value="8" step="0.1"></tone-slider>
+							<div class="slider-value" id="resonance-value"></div>
+						</div>
+					</div>
 				</div>
 				<div class="control-group">
 					<h3>Envelope</h3>
-					<tone-slider id="decay-slider" label="Decay" min="0.1" max="2" value="0.8" step="0.01"></tone-slider>
-					<tone-slider id="accent-slider" label="Accent" min="0" max="1" value="0.3" step="0.01"></tone-slider>
+					<div class="slider-row">
+						<div class="slider-col">
+							<div class="slider-label">Decay</div>
+							<tone-slider id="decay-slider" min="0.1" max="2" value="0.8" step="0.01"></tone-slider>
+							<div class="slider-value" id="decay-value"></div>
+						</div>
+						<div class="slider-col">
+							<div class="slider-label">Accent</div>
+							<tone-slider id="accent-slider" min="0" max="1" value="0.3" step="0.01"></tone-slider>
+							<div class="slider-value" id="accent-value"></div>
+						</div>
+					</div>
 				</div>
 				<div class="control-group">
 					<h3>Drive</h3>
-					<tone-slider id="distortion-slider" label="Distortion" min="0" max="1" value="0.2" step="0.01"></tone-slider>
-					<tone-slider id="slide-slider" label="Slide" min="0" max="0.5" value="0.1" step="0.01"></tone-slider>
+					<div class="slider-row">
+						<div class="slider-col">
+							<div class="slider-label">Distortion</div>
+							<tone-slider id="distortion-slider" min="0" max="1" value="0.2" step="0.01"></tone-slider>
+							<div class="slider-value" id="distortion-value"></div>
+						</div>
+						<div class="slider-col">
+							<div class="slider-label">Slide</div>
+							<tone-slider id="slide-slider" min="0" max="0.5" value="0.1" step="0.01"></tone-slider>
+							<div class="slider-value" id="slide-value"></div>
+						</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<h3>Volume</h3>
+					<div class="slider-row">
+						<div class="slider-col">
+							<div class="slider-label">Volume</div>
+							<input type="range" id="master-volume" min="-60" max="0" value="-6" step="1">
+							<div class="slider-value" id="volume-value"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<tone-step-sequencer id="sequencer" rows="8" columns="16"></tone-step-sequencer>
-			<!-- Slider volume generale -->
-			<div style="margin-bottom:10px; display:flex; align-items:center; gap:10px;">
-				<label for="master-volume">Volume</label>
-				<input type="range" id="master-volume" min="-60" max="0" value="-6" step="1" style="width:150px;">
-			</div>
 		</div>
 
 		<script>
@@ -398,6 +527,27 @@
 					// Accent: opzionale, puoi aggiungere logica per accent se il sequencer lo supporta
 				});
 			});
+
+			// Aggiorna i valori numerici sotto ogni slider
+			function updateSliderValue(id, value) {
+				document.getElementById(id).textContent = value;
+			}
+
+			document.getElementById('cutoff-slider').addEventListener('input', e => updateSliderValue('cutoff-value', e.detail.value || e.target.value));
+			document.getElementById('resonance-slider').addEventListener('input', e => updateSliderValue('resonance-value', e.detail.value || e.target.value));
+			document.getElementById('decay-slider').addEventListener('input', e => updateSliderValue('decay-value', e.detail.value || e.target.value));
+			document.getElementById('accent-slider').addEventListener('input', e => updateSliderValue('accent-value', e.detail.value || e.target.value));
+			document.getElementById('distortion-slider').addEventListener('input', e => updateSliderValue('distortion-value', e.detail.value || e.target.value));
+			document.getElementById('slide-slider').addEventListener('input', e => updateSliderValue('slide-value', e.detail.value || e.target.value));
+			document.getElementById('master-volume').addEventListener('input', e => updateSliderValue('volume-value', e.target.value));
+			// Inizializza valori
+			updateSliderValue('cutoff-value', document.getElementById('cutoff-slider').value);
+			updateSliderValue('resonance-value', document.getElementById('resonance-slider').value);
+			updateSliderValue('decay-value', document.getElementById('decay-slider').value);
+			updateSliderValue('accent-value', document.getElementById('accent-slider').value);
+			updateSliderValue('distortion-value', document.getElementById('distortion-slider').value);
+			updateSliderValue('slide-value', document.getElementById('slide-slider').value);
+			updateSliderValue('volume-value', document.getElementById('master-volume').value);
 		</script>
 	</body>
 </html>

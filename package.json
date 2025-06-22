@@ -27,6 +27,8 @@
 		"worker-loader": "^2.0.0"
 	},
 	"dependencies": {
+		"@fontsource/inter": "^5.2.6",
+		"@fontsource/space-grotesk": "^5.2.8",
 		"@material/mwc-icon": "^0.17.2",
 		"@material/mwc-slider": "^0.17.2",
 		"@tonejs/plot": "0.0.35",
